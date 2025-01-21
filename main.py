@@ -1,9 +1,11 @@
-# Игровой процесс
 import pygame
 import random
 import os
+from Sprites_class import Background2, Background1, Mushroom
 
 
+# Игровой процесс
+# Функция загрузки изображений
 def load_image(name, colorkey=-1):
     fullname = os.path.join('images', name)
     try:
@@ -18,26 +20,12 @@ def load_image(name, colorkey=-1):
     return image
 
 
-class Backround(pygame.sprite.Sprite):
-    image = load_image("background1.jpg", None)
-    def __init__(self, group):
-        super().__init__(self, group)
-        self.image = Backround.image
-        self.rect = self.image.get_rect()
-        self.rect.x = 0
-        self.rect.y = 0
-
-    def update(self, *args):
-        self.rect = self.rect.move(0, v)
-
-
-
 if __name__ == '__main__':
     pygame.init()
     size = width, height = 300, 500
     screen = pygame.display.set_mode(size)
     running = True
-    v = 10
+    V = 20
     clock = pygame.time.Clock()
     # Персонаж
     unit_pos = 1  # индекс дорожки
@@ -45,14 +33,15 @@ if __name__ == '__main__':
     # Препятствия
     barriers_scale = 50  # размер
     barriers = []  # координаты на экране
-    # Грибы
-    mushrooms_scale = 50  # размер
-    mushrooms = []  # координаты на экране
 
+    backgrounds_sprites = pygame.sprite.Group()
+    background1 = Background1(backgrounds_sprites)
+    background2 = Background2(backgrounds_sprites)
+    backgrounds_sprites.add(background1)
+    backgrounds_sprites.add(background2)
 
-    all_sprites = pygame.sprite.Group()
-    background = Backround(all_sprites)
-    all_sprites.add(background)
+    mushrooms_sprites = pygame.sprite.Group()
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -66,9 +55,10 @@ if __name__ == '__main__':
                         unit_pos -= 1
 
         screen.fill((0, 0, 0))
+
+        backgrounds_sprites.draw(screen)
+        backgrounds_sprites.update()
         # Отрисовка персонажа
-        all_sprites.draw(screen)
-        all_sprites.update()
         pygame.draw.rect(screen, 'red', (unit_pos * 100 + unit_scale // 2 , height - unit_scale,
                                          unit_scale, unit_scale), 0)
         # Отрисовка препятствий
@@ -79,19 +69,20 @@ if __name__ == '__main__':
             barriers.append([barrier_road, 0])
         for el in barriers:
             pygame.draw.rect(screen, 'white', [int(el[0]), int(el[1]), barriers_scale, barriers_scale], 0)
-            el[1] += v
+            el[1] += V
             if el[1] >= height:
                  barriers.remove(el)
         # Отрисовка грибов
         mush_road =  (random.randint(1, 3) * 100 - 75)
         can_draw_mush = random.randint(1, 100) # Шанс на отрисовку
         if can_draw_mush > 95 and can_draw_barrier < 40:
-            mushrooms.append([mush_road, 0])
-        for el in mushrooms:
-            pygame.draw.rect(screen, 'green', [int(el[0]), int(el[1]), mushrooms_scale, mushrooms_scale], 0)
-            el[1] += v
-            if el[1] >= height:
-                mushrooms.remove(el)
+            new_mushroom = Mushroom(road=mush_road, y=0)
+            mushrooms_sprites.add(new_mushroom)
+        for el in mushrooms_sprites:
+            el.update()
+            if el.rect.y >= height:
+                mushrooms_sprites.remove(el)
+        mushrooms_sprites.draw(screen)
         clock.tick(30)
         pygame.display.flip()
     pygame.quit()
