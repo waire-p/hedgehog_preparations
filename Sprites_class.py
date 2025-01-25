@@ -1,5 +1,7 @@
 import pygame
 import os
+from random import randint
+
 
 def load_image(name, colorkey=-1):
     fullname = os.path.join('images', name)
@@ -49,12 +51,50 @@ class Background2(pygame.sprite.Sprite):
 
 class Mushroom(pygame.sprite.Sprite):
     image = load_image('mushroom.png', -1)
-    def __init__(self, *group, road, y):
+    def __init__(self, *group, road):
         super().__init__(*group)
-        self.mushroom = Background2.image
+        self.mushroom = Mushroom.image
         self.rect = self.mushroom.get_rect()
         self.rect.x = road
-        self.rect.y = y
+        self.rect.y = 0
+
+    def update(self, *args):
+        self.rect = self.rect.move(0, V)
+
+
+class Barrier1(pygame.sprite.Sprite):
+    image = load_image('barrier1.png', -1)
+    def __init__(self, *group, road):
+        super().__init__(*group)
+        self.barrier = Barrier1.image
+        self.rect = self.barrier.get_rect()
+        self.rect.x = road
+        self.rect.y = 0
+
+    def update(self, *args):
+        self.rect = self.rect.move(0, V)
+
+
+class Barrier2(pygame.sprite.Sprite):
+    image = load_image('barrier2.png', -1)
+    def __init__(self, *group, road):
+        super().__init__(*group)
+        self.barrier = Barrier2.image
+        self.rect = self.barrier.get_rect()
+        self.rect.x = road
+        self.rect.y = 0
+
+    def update(self, *args):
+        self.rect = self.rect.move(0, V)
+
+class Barrier3(pygame.sprite.Sprite):
+    image = load_image('barrier3.png', -1)
+    def __init__(self, *group, road):
+        super().__init__(*group)
+        self.barrier = Barrier3.image
+        self.rect = self.barrier.get_rect()
+        self.rect.x = road
+        self.rect.y = 0
 
     def update(self, *args):
         self.rect = self.rect.move(0, V)
