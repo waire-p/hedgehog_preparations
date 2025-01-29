@@ -1,6 +1,5 @@
 import pygame
 import os
-from random import randint
 
 
 def load_image(name, colorkey=-1):
@@ -17,7 +16,7 @@ def load_image(name, colorkey=-1):
     return image
 
 
-size = width, height = 300, 500
+width, height = 300, 500
 V = 20
 
 class Background1(pygame.sprite.Sprite):
@@ -101,10 +100,10 @@ class Barrier3(pygame.sprite.Sprite):
 
 
 class Hedgehog(pygame.sprite.Sprite):
-    def __init__(self, *group, sheet, columns, rows):
+    def __init__(self, *group, sheet, cols, rows):
         super().__init__(*group)
         self.frames = []
-        self.cut_sheet(sheet, columns, rows)
+        self.cut_sheet(sheet, cols, rows)
         self.cur_frame = 0
         self.image = self.frames[self.cur_frame]
         self.rect = self.rect.move(0, height - 100)
@@ -126,3 +125,28 @@ class Hedgehog(pygame.sprite.Sprite):
             self.tick = 0
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
             self.image = self.frames[self.cur_frame]
+
+class TrueHole(pygame.sprite.Sprite):
+    image = load_image('true_hole.png', -1)
+    def __init__(self, *group, road):
+        super().__init__(*group)
+        self.barrier = TrueHole.image
+        self.rect = self.barrier.get_rect()
+        self.rect.x = road
+        self.rect.y = 0
+
+    def update(self, *args):
+        self.rect = self.rect.move(0, V)
+
+
+class FakeHole(pygame.sprite.Sprite):
+    image = load_image('fake_hole.png', -1)
+    def __init__(self, *group, road):
+        super().__init__(*group)
+        self.barrier = FakeHole.image
+        self.rect = self.barrier.get_rect()
+        self.rect.x = road
+        self.rect.y = 0
+
+    def update(self, *args):
+        self.rect = self.rect.move(0, V)
