@@ -239,12 +239,12 @@ if __name__ == '__main__':
     size = width, height = 300, 500
     screen = pygame.display.set_mode(size)
     running = True
-    V = 17
-    GRAVITY = 0.3
+    V = 16
+    GRAVITY = -1
     clock = pygame.time.Clock()
     # Событие генерации норы
     GENERATEHOLE = pygame.USEREVENT + 1
-    pygame.time.set_timer(GENERATEHOLE, 60000) # 60000мс / 1 минута
+    pygame.time.set_timer(GENERATEHOLE, 30000) # 30000мс / 30 секунд
     screen_rect = (0, 0, width, height)
     character_road = 1  # индекс дорожки персонажа
     # Задний фон
@@ -293,7 +293,7 @@ if __name__ == '__main__':
         can_draw_barrier = random.randint(1, 100) # Шанс на отрисовку
         barriers = [Barrier1(road=barrier_road), Barrier2(road=barrier_road), Barrier3(road=barrier_road)]
         barrier_type = random.randint(0, len(barriers) - 1)  # Определение типа спрайта
-        if can_draw_barrier > 97:
+        if can_draw_barrier > 98:
             new_barrier = barriers[barrier_type]
             barrier_sprites.add(new_barrier)
 
