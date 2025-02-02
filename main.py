@@ -27,6 +27,10 @@ def create_hit_particles(position):
         HitParticle(position, random.choice(numbers), random.choice(numbers))
 
 
+def create_collect_particles(position):
+    CollectParticle(position, 1, 1)
+
+
 # Спрайты заднего фона
 class Background1(pygame.sprite.Sprite):
     image = load_image("background.png", None)
@@ -71,6 +75,7 @@ class Mushroom(pygame.sprite.Sprite):
         global mushroom_count
         self.rect = self.rect.move(0, V)
         if pygame.sprite.spritecollideany(self, character_ani_sprite):
+            create_collect_particles((self.rect.x, self.rect.y))  # Создание частиц сбопа грибов
             mushroom_count += 1  # Добавление к счетчику
             self.kill()
 
@@ -212,12 +217,29 @@ class HitParticle(pygame.sprite.Sprite):
             self.kill()
 
 
+class CollectParticle(pygame.sprite.Sprite):
+    def __init__(self, pos, dx, dy):
+        super().__init__(particles_sprites)
+        self.image = pygame.transform.scale(load_image("collect.png"), (40, 40))
+        self.rect = self.image.get_rect()
+        self.velocity = [dx, dy]
+        self.rect.x, self.rect.y = pos
+        self.gravity = GRAVITY
+
+    def update(self):
+        self.velocity[1] += self.gravity
+        self.rect.x += self.velocity[0]
+        self.rect.y += self.velocity[1]
+        if not self.rect.colliderect(screen_rect):
+            self.kill()
+
+
 if __name__ == '__main__':
     pygame.init()
     size = width, height = 300, 500
     screen = pygame.display.set_mode(size)
     running = True
-    V = 20
+    V = 17
     GRAVITY = 0.3
     clock = pygame.time.Clock()
     # Событие генерации норы
@@ -256,21 +278,16 @@ if __name__ == '__main__':
                 hole_type = random.randint(0, len(holes) - 1)
                 new_hole = holes[hole_type]
                 hole_sprites.add(new_hole)
-
-        # Отрисовка и движение заднего фона
-        backgrounds_sprites.draw(screen)
+        # движение заднего фона и частиц
         backgrounds_sprites.update()
-
         particles_sprites.update()
         # Счетчик
         counter = load_image('counter.png', -1)
         font = pygame.font.SysFont('Arial', 30)
         counter_text = font.render('0' * (6 - len(str(mushroom_count))) + str(mushroom_count),
                                    True, (248, 200, 145))
-
         # Обновление анимации персонажа
         character_ani_sprite.update(character_road)
-
         # Генерация препятствий и их перемещение
         barrier_road = (random.randint(1, 3) * 100 - 75)
         can_draw_barrier = random.randint(1, 100) # Шанс на отрисовку
@@ -284,7 +301,6 @@ if __name__ == '__main__':
             el.update()
             if el.rect.y >= height:
                 el.kill()
-
         # Генерация грибов и их перемещение
         mush_road = (random.randint(1, 3) * 100 - 75)
         can_draw_mush = random.randint(1, 100)  # Шанс на отрисовку
@@ -300,8 +316,8 @@ if __name__ == '__main__':
             el.update()
             if el.rect.y >= height:
                 el.kill()
-
         # Отрисовка необходимых спрайтов
+        backgrounds_sprites.draw(screen)
         particles_sprites.draw(screen)
         mushroom_sprites.draw(screen)
         barrier_sprites.draw(screen)
