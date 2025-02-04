@@ -90,12 +90,15 @@ class Barrier1(pygame.sprite.Sprite):
         self.rect.y = 0
 
     def update(self, *args):
-        global running
+        global running, lives
         self.rect = self.rect.move(0, V)
         if pygame.sprite.spritecollideany(self, character_ani_sprite):
+            lives -= 1
+            lives_ani_sprite.update()
+            if lives == 0:
+                running = False
             create_hit_particles((self.rect.x, self.rect.y))  # Создание частиц удара
             self.kill()
-            running = False
 
 
 class Barrier2(pygame.sprite.Sprite):
@@ -108,12 +111,15 @@ class Barrier2(pygame.sprite.Sprite):
         self.rect.y = 0
 
     def update(self, *args):
-        global running
+        global running, lives
         self.rect = self.rect.move(0, V)
         if pygame.sprite.spritecollideany(self, character_ani_sprite):
+            lives -= 1
+            lives_ani_sprite.update()
+            if lives == 0:
+                running = False
             create_hit_particles((self.rect.x, self.rect.y))  # Создание частиц удара
             self.kill()
-            running = False
 
 
 class Barrier3(pygame.sprite.Sprite):
@@ -126,12 +132,15 @@ class Barrier3(pygame.sprite.Sprite):
         self.rect.y = 0
 
     def update(self, *args):
-        global running
+        global running, lives
         self.rect = self.rect.move(0, V)
         if pygame.sprite.spritecollideany(self, character_ani_sprite):
+            lives -= 1
+            lives_ani_sprite.update()
+            if lives == 0:
+                running = False
             create_hit_particles((self.rect.x, self.rect.y))  # Создание частиц удара
             self.kill()
-            running = False
 
 # Спрайт персонажа
 class Hedgehog(pygame.sprite.Sprite):
@@ -161,6 +170,29 @@ class Hedgehog(pygame.sprite.Sprite):
             self.cur_frame = (self.cur_frame + 1) % len(self.frames)
             self.image = self.frames[self.cur_frame]
 
+
+class Lives(pygame.sprite.Sprite):
+    def __init__(self, *group, sheet, cols, rows):
+        super().__init__(*group)
+        self.frames = []
+        self.cut_sheet(sheet, cols, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(5, 10)
+        self.tick = 0
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def update(self):
+        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+        self.image = self.frames[self.cur_frame]
 # Спрайт нор для сохранения результатов
 class TrueHole(pygame.sprite.Sprite):
     image = load_image('true_hole.png', -1)
@@ -258,6 +290,10 @@ if __name__ == '__main__':
     barrier_sprites = pygame.sprite.Group()
     character_ani_sprite = pygame.sprite.Group()
     character_ani_sprite.add(Hedgehog(character_ani_sprite, sheet=load_image("hedgehog.1.png"), cols=2, rows=2))
+    lives_ani_sprite = pygame.sprite.Group()
+    lives_ani_sprite.add(Lives(lives_ani_sprite, sheet=load_image('hearts.png'), cols=1, rows=4))
+
+    lives = 3
     mushroom_count = 0
     while running:
         for event in pygame.event.get():
@@ -324,6 +360,7 @@ if __name__ == '__main__':
         hole_sprites.draw(screen)
         character_ani_sprite.draw(screen)
         screen.blit(counter, (0, 0))
+        lives_ani_sprite.draw(screen)
         screen.blit(counter_text, (width // 2 - counter_text.get_width() // 2, 3))
         clock.tick(30)
         pygame.display.flip()
