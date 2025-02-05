@@ -294,7 +294,7 @@ if __name__ == '__main__':
     mushroom_sprites = pygame.sprite.Group()
     barrier_sprites = pygame.sprite.Group()
     character_ani_sprite = pygame.sprite.Group()
-    character_ani_sprite.add(Hedgehog(character_ani_sprite, sheet=load_image("hedgehog.1.png"), cols=2, rows=2))
+    character_ani_sprite.add(Hedgehog(character_ani_sprite, sheet=load_image("hedgehog.png"), cols=2, rows=2))
     lives_ani_sprite = pygame.sprite.Group()
     lives_ani_sprite.add(Lives(lives_ani_sprite, sheet=load_image('hearts.png'), cols=1, rows=4))
     while running:
