@@ -88,13 +88,18 @@ class Barrier1(pygame.sprite.Sprite):
         self.rect.y = 0
 
     def update(self, *args):
-        global running, lives
+        global lives
         self.rect = self.rect.move(0, game_speed)
         if pygame.sprite.spritecollideany(self, character_ani_sprite):
             lives -= 1
             lives_ani_sprite.update()
             if lives == 0:
-                running = False
+                lives = 3
+                mushroom_sprites.empty()
+                barrier_sprites.empty()
+                hole_sprites.empty()
+                particles_sprites.empty()
+                death()
             create_hit_particles((self.rect.x, self.rect.y))  # Создание частиц удара
             self.kill()
 
@@ -109,13 +114,18 @@ class Barrier2(pygame.sprite.Sprite):
         self.rect.y = 0
 
     def update(self, *args):
-        global running, lives
+        global lives
         self.rect = self.rect.move(0, game_speed)
         if pygame.sprite.spritecollideany(self, character_ani_sprite):
             lives -= 1
             lives_ani_sprite.update()
             if lives == 0:
-                running = False
+                lives = 3
+                mushroom_sprites.empty()
+                barrier_sprites.empty()
+                hole_sprites.empty()
+                particles_sprites.empty()
+                death()
             create_hit_particles((self.rect.x, self.rect.y))  # Создание частиц удара
             self.kill()
 
@@ -130,13 +140,18 @@ class Barrier3(pygame.sprite.Sprite):
         self.rect.y = 0
 
     def update(self, *args):
-        global running, lives
+        global lives
         self.rect = self.rect.move(0, game_speed)
         if pygame.sprite.spritecollideany(self, character_ani_sprite):
             lives -= 1
             lives_ani_sprite.update()
             if lives == 0:
-                running = False
+                lives = 3
+                mushroom_sprites.empty()
+                barrier_sprites.empty()
+                hole_sprites.empty()
+                particles_sprites.empty()
+                death()
             create_hit_particles((self.rect.x, self.rect.y))  # Создание частиц удара
             self.kill()
 
@@ -189,8 +204,12 @@ class Lives(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def update(self):
-        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
-        self.image = self.frames[self.cur_frame]
+        if lives == 0:
+            self.cur_frame = 0
+            self.image = self.frames[self.cur_frame]
+        else:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.image = self.frames[self.cur_frame]
 
 # Спрайт нор для сохранения результатов
 class TrueHole(pygame.sprite.Sprite):
@@ -203,11 +222,16 @@ class TrueHole(pygame.sprite.Sprite):
         self.rect.y = 0
 
     def update(self, *args):
-        global running
+        global lives
         self.rect = self.rect.move(0, game_speed)
         if pygame.sprite.spritecollideany(self, character_ani_sprite):
             self.kill()
-            running = False
+            lives = 3
+            mushroom_sprites.empty()
+            barrier_sprites.empty()
+            hole_sprites.empty()
+            particles_sprites.empty()
+            good_ending()
 
 
 class FakeHole(pygame.sprite.Sprite):
@@ -220,11 +244,16 @@ class FakeHole(pygame.sprite.Sprite):
         self.rect.y = 0
 
     def update(self, *args):
-        global running
+        global lives
         self.rect = self.rect.move(0, game_speed)
         if pygame.sprite.spritecollideany(self, character_ani_sprite):
             self.kill()
-            running = False
+            lives = 3
+            mushroom_sprites.empty()
+            barrier_sprites.empty()
+            hole_sprites.empty()
+            particles_sprites.empty()
+            bad_ending()
 
 # Спрайты частиц
 class HitParticle(pygame.sprite.Sprite):
@@ -265,18 +294,13 @@ class CollectParticle(pygame.sprite.Sprite):
             self.kill()
 
 
-if __name__ == '__main__':
-    pygame.init()
-    size = width, height = 300, 500
-    screen = pygame.display.set_mode(size)
+def play():
+    global game_speed
+    global lives, mushroom_count
     running = True
-    game_speed = 10
-    GRAVITY = -1
-    lives = 3  # возможности сколкновения с препятствиями (жизни)
     mushroom_count = 0  # Собранные грибы
-    screen_rect = (0, 0, width, height)  # "Рамка" при прикосновении к которой частицы исчезают
     character_road = 1  # индекс дорожки персонажа
-    barrier_chance = 98
+    barrier_chance = 98 # шанс на появление препятствия
     clock = pygame.time.Clock()
     # Событие генерации норы
     GENERATEHOLE = pygame.USEREVENT + 1
@@ -284,19 +308,6 @@ if __name__ == '__main__':
     # Событие увеличения скорости персонажа
     ADDGAMESPEED = pygame.USEREVENT + 2
     pygame.time.set_timer(ADDGAMESPEED, 20000)  # 20000мс / 20 секунд
-    # Задний фон
-    backgrounds_sprites = pygame.sprite.Group()
-    backgrounds_sprites.add(Background1(backgrounds_sprites))
-    backgrounds_sprites.add(Background2(backgrounds_sprites))
-    # Группы спрайтов
-    particles_sprites = pygame.sprite.Group()
-    hole_sprites = pygame.sprite.Group()
-    mushroom_sprites = pygame.sprite.Group()
-    barrier_sprites = pygame.sprite.Group()
-    character_ani_sprite = pygame.sprite.Group()
-    character_ani_sprite.add(Hedgehog(character_ani_sprite, sheet=load_image("hedgehog.png"), cols=2, rows=2))
-    lives_ani_sprite = pygame.sprite.Group()
-    lives_ani_sprite.add(Lives(lives_ani_sprite, sheet=load_image('hearts.png'), cols=1, rows=4))
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -316,6 +327,7 @@ if __name__ == '__main__':
                 hole_type = random.randint(0, len(holes) - 1)
                 new_hole = holes[hole_type]
                 hole_sprites.add(new_hole)
+            # Увеличение скорости игры
             if event.type == ADDGAMESPEED:
                 if game_speed < 30:
                     game_speed += 0.5
@@ -331,10 +343,10 @@ if __name__ == '__main__':
         character_ani_sprite.update(character_road)
         # Генерация препятствий и их перемещение
         barrier_road = (random.randint(1, 3) * 100 - 75)
-        can_draw_barrier = random.randint(1, 100) # Шанс на отрисовку
+        can_draw_barrier = random.randint(1, 100)  # Шанс на отрисовку
         barriers = [Barrier1(road=barrier_road), Barrier2(road=barrier_road), Barrier3(road=barrier_road)]
         barrier_type = random.randint(0, len(barriers) - 1)  # Определение типа спрайта
-        if game_speed > 25: # изменение шанса на отрисовку препятствий при скорости > 25 пикс/сек
+        if game_speed > 25:  # изменение шанса на отрисовку препятствий при скорости > 25 пикс/сек
             barrier_chance = 96
         if can_draw_barrier > barrier_chance:
             new_barrier = barriers[barrier_type]
@@ -353,7 +365,7 @@ if __name__ == '__main__':
         for el in mushroom_sprites:
             el.update()
             if el.rect.y >= height:
-                 el.kill()
+                el.kill()
         # Проверка выхода объекта за пределы экрана
         for el in hole_sprites:
             el.update()
@@ -369,6 +381,33 @@ if __name__ == '__main__':
         screen.blit(counter, (0, 0))
         lives_ani_sprite.draw(screen)
         screen.blit(counter_text, (width // 2 - counter_text.get_width() // 2, 3))
+
         clock.tick(30)
         pygame.display.flip()
+
+
+if __name__ == '__main__':
+    pygame.init()
+    size = width, height = 300, 500
+    screen = pygame.display.set_mode(size)
+
+    game_speed = 10
+    GRAVITY = -1
+    lives = 3  # возможности сколкновения с препятствиями (жизни)
+    mushroom_count = 0  # Собранные грибы
+    screen_rect = (0, 0, width, height)  # "Рамка" при прикосновении к которой частицы исчезают
+    # Задний фон
+    backgrounds_sprites = pygame.sprite.Group()
+    backgrounds_sprites.add(Background1(backgrounds_sprites))
+    backgrounds_sprites.add(Background2(backgrounds_sprites))
+    # Группы спрайтов
+    particles_sprites = pygame.sprite.Group()
+    hole_sprites = pygame.sprite.Group()
+    mushroom_sprites = pygame.sprite.Group()
+    barrier_sprites = pygame.sprite.Group()
+    character_ani_sprite = pygame.sprite.Group()
+    character_ani_sprite.add(Hedgehog(character_ani_sprite, sheet=load_image("hedgehog.png"), cols=2, rows=2))
+    lives_ani_sprite = pygame.sprite.Group()
+    lives_ani_sprite.add(Lives(lives_ani_sprite, sheet=load_image('hearts.png'), cols=1, rows=4))
+    play()
     pygame.quit()
