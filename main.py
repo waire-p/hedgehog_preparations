@@ -347,7 +347,7 @@ if __name__ == '__main__':
         # Генерация грибов и их перемещение
         mush_road = (random.randint(1, 3) * 100 - 75)
         can_draw_mush = random.randint(1, 100)  # Шанс на отрисовку
-        if can_draw_mush > 95 and can_draw_barrier > 40:
+        if can_draw_mush > barrier_chance and can_draw_barrier > 40:
             new_mushroom = Mushroom(road=mush_road)
             mushroom_sprites.add(new_mushroom)
         for el in mushroom_sprites:
