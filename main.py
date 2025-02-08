@@ -119,6 +119,7 @@ def good_ending():
                         if 50 <= x <= 130:
                             main_menu()
                         if 170 <= x <= 250:
+                            lives = 3
                             play()
         clock.tick(fps)
         pygame.display.flip()
@@ -132,7 +133,7 @@ def bad_ending():
                       True, (248, 200, 145))
     x, y = 0, 0
     # Отрисовка текста
-    screen.blit(good_end, (0, 0))
+    screen.blit(bad_end, (0, 0))
     screen.blit(message, (width // 2 - txt.get_width() // 2 - 10, 90))
     screen.blit(txt, (width // 2 - txt.get_width() // 2, 210))
     pygame.display.flip()
@@ -149,6 +150,7 @@ def bad_ending():
                         if 50 <= x <= 130:
                             main_menu()
                         if 170 <= x <= 250:
+                            lives = 3
                             play()
         clock.tick(fps)
         pygame.display.flip()
@@ -161,7 +163,7 @@ def death():
                       True, (248, 200, 145))
     x, y = 0, 0
     # Отрисовка текста
-    screen.blit(good_end, (0, 0))
+    screen.blit(death_end, (0, 0))
     screen.blit(message, (width // 2 - txt.get_width() // 2 - 10, 90))
     screen.blit(txt, (width // 2 - txt.get_width() // 2, 210))
     pygame.display.flip()
@@ -178,6 +180,7 @@ def death():
                         if 50 <= x <= 130:
                             main_menu()
                         if 170 <= x <= 250:
+                            lives = 3
                             play()
         clock.tick(fps)
         pygame.display.flip()
@@ -187,6 +190,8 @@ def play():
     global game_speed
     global lives, mushroom_count
     running = True
+    lives = 3
+    lives_ani_sprite.update()
     mushroom_count = 0  # Собранные грибы
     character_road = 1  # индекс дорожки персонажа
     barrier_chance = 98  # шанс на появление препятствия
@@ -523,7 +528,7 @@ class Lives(pygame.sprite.Sprite):
                     frame_location, self.rect.size)))
 
     def update(self):
-        if lives == 0:
+        if lives == 3:
             self.cur_frame = 0
             self.image = self.frames[self.cur_frame]
         else:
