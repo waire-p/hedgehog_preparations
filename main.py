@@ -284,14 +284,15 @@ def statistics():
     pl = cur.execute(f"SELECT mushrooms FROM Statistics WHERE name = '{name}'").fetchone()
     result.reverse()
     screen.blit(statistics_image, (0, 0))
-    table_text = main_font.render('Таблица лидеров', True, (57, 32, 14))
+    color = (0, 0, 0)
+    table_text = main_font.render('Таблица лидеров', True, color)
     player_text = f'{name}    {str(pl[0])}'
-    player_stat = font.render(player_text, True, (57, 32, 14))
+    player_stat = font.render(player_text, True, color)
     # Отрисовка рекордов первых 10 игроков в бд по грибам
     for i in range(10 * (len(result) >= 10) + len(result) * (len(result) < 10)):
         txt = str(i + 1) + '    ' * (i + 1 < 10) + '  ' * (i + 1 == 10) + result[i][0]
-        string = font.render(txt, True, (57, 32, 14))
-        mush = font.render(str(result[i][1]), True, (57, 32, 14))
+        string = font.render(txt, True, color)
+        mush = font.render(str(result[i][1]), True, color)
         screen.blit(string, (30, 120 + 27 * i))
         screen.blit(mush, (230, 120 + 27 * i))
     screen.blit(table_text, (30, 30))
