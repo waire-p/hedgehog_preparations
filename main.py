@@ -2,7 +2,7 @@ import sys
 import sqlite3
 import os
 import pygame
-from pyexpat.errors import messages
+import random
 
 
 def start_game():
