@@ -2,9 +2,11 @@ import sys
 import sqlite3
 import os
 import pygame
+from pyexpat.errors import messages
 
 
 def start_game():
+    # Создание поля для ввода имени
     font = pygame.font.Font(None, 25)
     input_box = pygame.Rect(25, 175, 250, 27)
     enter_box = pygame.Rect(50, 225, 200, 27)
@@ -19,6 +21,7 @@ def start_game():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 exit_game()
+            # Нажатие кнопки
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if input_box.collidepoint(event.pos):
                     active = not active
@@ -27,7 +30,7 @@ def start_game():
                         return text
                 else:
                     active = False
-                color = color_active if active else color_inactive
+                color = color_active if active else color_inactive  # изменение цвета при нажатии на поле ввода
             if event.type == pygame.KEYDOWN:
                 if active:
                     if event.key == pygame.K_BACKSPACE:
@@ -40,7 +43,7 @@ def start_game():
                     enter_color = color_active
                 else:
                     enter_color = color_inactive
-
+        # Отрисовка
         screen.fill((125, 84, 0))
         pygame.draw.rect(screen, color, input_box, 0)
         pygame.draw.rect(screen, enter_color, enter_box, 0)
@@ -55,10 +58,16 @@ def start_game():
 
 def main_menu():
     x, y = 0, 0
-    font = pygame.font.Font(None, 25)
-    menu_text = font.render('Ежиные заготовки', True, (0, 0, 0))
+    font = pygame.font.Font(None, 45)
+    menu_text_outline = font.render('Ежиные заготовки', True, (40, 28, 16))
+    menu_text = font.render('Ежиные заготовки', True, (248, 200, 145))
     screen.blit(menu, (0, 0))
-    screen.blit(menu_text, (68, 25))
+    # Обводка текста названия игры
+    screen.blit(menu_text_outline, (width // 2 - menu_text.get_width() // 2 - 2, 55 + 2))
+    screen.blit(menu_text_outline, (width // 2 - menu_text.get_width() // 2 + 2, 55 - 2))
+    screen.blit(menu_text_outline, (width // 2 - menu_text.get_width() // 2 + 2, 55 + 2))
+    screen.blit(menu_text_outline, (width // 2 - menu_text.get_width() // 2 - 2, 55 - 2))
+    screen.blit(menu_text, (width // 2 - menu_text.get_width() // 2, 55))
     pygame.display.flip()
     while True:
         for event in pygame.event.get():
@@ -68,6 +77,7 @@ def main_menu():
             if event.type == pygame.MOUSEMOTION:
                 x, y = event.pos
             if event.type == pygame.MOUSEBUTTONDOWN:
+                # Пересечение курсора для нажатия кнопок
                 if pygame.mouse.get_pressed()[0]:
                     if 90 <= x <= 210:
                         if 195 <= y <= 258:
@@ -81,14 +91,20 @@ def main_menu():
 
 
 def good_ending():
+    # Размещение необходимого текста
     font = pygame.font.Font(None, 60)
-    txt = font.render(str(mushroom_count), True, (255, 255, 255))
+    message =  font.render('You win!', True, (248, 200, 145))
+    txt = font.render('0' * (6 - len(str(mushroom_count))) + str(mushroom_count),
+                                   True, (248, 200, 145))
+    # Запись результатов в базу данных
     result = cur.execute(f"SELECT mushrooms FROM Statistics WHERE name = '{name}'").fetchone()
     if mushroom_count > result[0]:
         cur.execute(f"UPDATE Statistics SET mushrooms = {mushroom_count} WHERE name = '{name}'")
     x, y = 0, 0
+    # Отрисовка текста
     screen.blit(good_end, (0, 0))
-    screen.blit(txt, (70, 80))
+    screen.blit(message, (width // 2 - txt.get_width() // 2 - 10, 90))
+    screen.blit(txt, (width // 2 - txt.get_width() // 2, 210))
     pygame.display.flip()
     while True:
         for event in pygame.event.get():
@@ -97,6 +113,7 @@ def good_ending():
             if event.type == pygame.MOUSEMOTION:
                 x, y = event.pos
             if event.type == pygame.MOUSEBUTTONDOWN:
+                # Реакция на нажатие кнопок
                 if pygame.mouse.get_pressed()[0]:
                     if 300 <= y <= 380:
                         if 50 <= x <= 130:
@@ -108,11 +125,16 @@ def good_ending():
 
 
 def bad_ending():
+    # Размещение необходимого текста
     font = pygame.font.Font(None, 60)
-    txt = font.render(str(mushroom_count), True, (255, 255, 255))
+    message = font.render('You lost', True, (248, 200, 145))
+    txt = font.render('0' * (6 - len(str(mushroom_count))) + str(mushroom_count),
+                      True, (248, 200, 145))
     x, y = 0, 0
-    screen.blit(bad_end, (0, 0))
-    screen.blit(txt, (70, 80))
+    # Отрисовка текста
+    screen.blit(good_end, (0, 0))
+    screen.blit(message, (width // 2 - txt.get_width() // 2 - 10, 90))
+    screen.blit(txt, (width // 2 - txt.get_width() // 2, 210))
     pygame.display.flip()
     while True:
         for event in pygame.event.get():
@@ -121,6 +143,7 @@ def bad_ending():
             if event.type == pygame.MOUSEMOTION:
                 x, y = event.pos
             if event.type == pygame.MOUSEBUTTONDOWN:
+                # Реакция на нажатие кнопок
                 if pygame.mouse.get_pressed()[0]:
                     if 300 <= y <= 380:
                         if 50 <= x <= 130:
@@ -133,10 +156,14 @@ def bad_ending():
 
 def death():
     font = pygame.font.Font(None, 60)
-    txt = font.render(str(mushroom_count), True, (255, 255, 255))
+    message = font.render('You dead', True, (248, 200, 145))
+    txt = font.render('0' * (6 - len(str(mushroom_count))) + str(mushroom_count),
+                      True, (248, 200, 145))
     x, y = 0, 0
-    screen.blit(death_end, (0, 0))
-    screen.blit(txt, (70, 80))
+    # Отрисовка текста
+    screen.blit(good_end, (0, 0))
+    screen.blit(message, (width // 2 - txt.get_width() // 2 - 10, 90))
+    screen.blit(txt, (width // 2 - txt.get_width() // 2, 210))
     pygame.display.flip()
     while True:
         for event in pygame.event.get():
@@ -145,6 +172,7 @@ def death():
             if event.type == pygame.MOUSEMOTION:
                 x, y = event.pos
             if event.type == pygame.MOUSEBUTTONDOWN:
+                # Реакция на нажатие кнопок
                 if pygame.mouse.get_pressed()[0]:
                     if 300 <= y <= 380:
                         if 50 <= x <= 130:
@@ -163,16 +191,18 @@ def statistics():
     main_font = pygame.font.Font(None, 40)
     font = pygame.font.Font(None, 30)
     result = cur.execute("SELECT name, mushrooms FROM Statistics ORDER BY mushrooms").fetchmany(10)
-    pl = cur.execute(f"SELECT mushrooms FROM Statistics WHERE name = '{name}'").fetchone()
+    # Запрос на рекорд игрока
+    pl = cur.execute(f"SELECT id, mushrooms FROM Statistics WHERE name = '{name}'").fetchone()
     result.reverse()
     screen.blit(statistics_image, (0, 0))
-    table_text = main_font.render('Таблица лидеров', True, (255, 255, 255))
-    player_text = name + '  ' + str(pl[0])
-    player_stat = font.render(player_text, True, (255, 255, 255))
+    table_text = main_font.render('Таблица лидеров', True, (57, 32, 14))
+    player_text = f'{pl[0]}  {name}  {str(pl[1])}'
+    player_stat = font.render(player_text, True, (57, 32, 14))
+    # Отрисовка рекордов первых 10 игроков в бд по грибам
     for i in range(10 * (len(result) >= 10) + len(result) * (len(result) < 10)):
         txt = str(i + 1) + '    ' * (i + 1 < 10) + '  ' * (i + 1 == 10) + result[i][0]
-        string = font.render(txt, True, (255, 255, 255))
-        mush = font.render(str(result[i][1]), True, (255, 255, 255))
+        string = font.render(txt, True, (57, 32, 14))
+        mush = font.render(str(result[i][1]), True, (57, 32, 14))
         screen.blit(string, (30, 120 + 27 * i))
         screen.blit(mush, (230, 120 + 27 * i))
     screen.blit(table_text, (30, 30))
@@ -186,6 +216,7 @@ def statistics():
             if event.type == pygame.MOUSEMOTION:
                 x, y = event.pos
             if event.type == pygame.MOUSEBUTTONDOWN:
+                # Реакция на нажатие кнопок
                 if pygame.mouse.get_pressed()[0]:
                     if 410 <= y <= 490:
                         if 10 <= x <= 90:
@@ -222,13 +253,14 @@ if __name__ == '__main__':
     pygame.init()
     size = width, height = 300, 500
     screen = pygame.display.set_mode(size)
+    # Загрузка задних фонов меню
     menu = load_image('Main_menu.jpg', -1)
     good_end = load_image('Good_end.jpg', -1)
     bad_end = load_image('Bad_end.jpg', -1)
     death_end = load_image('Death.jpg', -1)
     statistics_image = load_image('Statistics.jpg', -1)
     clock = pygame.time.Clock()
-    fps = 60
+    fps = 30
     mushroom_count = 0
     name = start_game()
     res = cur.execute("SELECT name FROM Statistics").fetchall()
